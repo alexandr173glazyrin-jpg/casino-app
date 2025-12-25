@@ -6,271 +6,274 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --gold: linear-gradient(135deg, #f39c12, #f1c40f);
-            --dark-bg: #0f0f13;
-            --card-bg: #1a1a24;
-            --accent: #7d5fff;
+            --bg: #0a0a0c;
+            --panel: #14141a;
+            --accent: #00f2ff;
+            --gold: #ffcc00;
+            --text: #ffffff;
         }
 
         body {
-            background-color: var(--dark-bg);
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
             min-height: 100vh;
             overflow: hidden;
-            user-select: none;
         }
 
-        .header {
-            margin-bottom: 20px;
+        .top-bar {
+            margin-top: 30px;
             text-align: center;
         }
 
-        .header h1 {
-            font-size: 24px;
+        .top-bar h1 {
+            font-size: 20px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            background: var(--gold);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
+            letter-spacing: 4px;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
         }
 
-        /* Режимы игры */
-        .modes {
+        /* Режимы */
+        .mode-selector {
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+            background: var(--panel);
+            padding: 5px;
+            border-radius: 15px;
+            gap: 5px;
+            margin: 25px 0;
+            border: 1px solid #222;
         }
 
-        .mode-btn {
-            background: var(--card-bg);
-            border: 2px solid #333;
-            color: #888;
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-size: 12px;
+        .m-btn {
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #555;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
+            text-transform: uppercase;
         }
 
-        .mode-btn.active {
-            border-color: var(--accent);
-            color: white;
-            box-shadow: 0 0 10px rgba(125, 95, 255, 0.4);
+        .m-btn.active {
+            background: #1f1f2e;
+            color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.2);
         }
 
-        /* Рулетка */
-        .roulette-wrapper {
+        /* Витрина рулетки */
+        .viewport {
             position: relative;
-            width: 100%;
-            max-width: 350px;
-            height: 120px;
-            background: var(--card-bg);
+            width: 320px;
+            height: 140px;
+            background: var(--panel);
             border-radius: 20px;
-            border: 2px solid #2d2d3d;
+            border: 1px solid #2a2a35;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
         }
 
-        .selector {
+        .pointer {
             position: absolute;
             left: 50%;
             top: 0;
-            width: 4px;
-            height: 100%;
+            bottom: 0;
+            width: 2px;
             background: var(--accent);
-            z-index: 100;
+            z-index: 10;
             transform: translateX(-50%);
             box-shadow: 0 0 15px var(--accent);
         }
 
-        .selector::after {
+        .pointer::before, .pointer::after {
             content: '';
             position: absolute;
-            top: -5px;
-            left: -3px;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 8px solid var(--accent);
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
         }
 
-        .tape {
+        .pointer::before { top: 0; border-top: 8px solid var(--accent); }
+        .pointer::after { bottom: 0; border-bottom: 8px solid var(--accent); }
+
+        .track {
             display: flex;
             align-items: center;
             position: absolute;
             height: 100%;
             left: 0;
             will-change: transform;
-            transition: transform 5s cubic-bezier(0.15, 0, 0.05, 1);
         }
 
-        .item {
+        .card {
             min-width: 90px;
-            height: 80px;
-            margin: 0 5px;
-            background: #252535;
-            border-radius: 12px;
+            height: 110px;
+            margin: 0 6px;
+            background: #1c1c26;
+            border-radius: 14px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            border-bottom: 4px solid #3d3d5d;
+            border: 1px solid #2d2d3d;
+            transition: 0.3s;
         }
 
-        .item img { width: 30px; margin-bottom: 5px; }
-        
-        /* Цвета редкости */
-        .rare-low { border-color: #555; }
-        .rare-med { border-color: #3498db; color: #3498db; }
-        .rare-high { border-color: #9b59b6; color: #9b59b6; }
-        .rare-legend { border-color: #f1c40f; color: #f1c40f; text-shadow: 0 0 5px rgba(241, 196, 15, 0.5); }
+        .card b { font-size: 22px; margin-bottom: 2px; }
+        .card span { font-size: 10px; opacity: 0.5; text-transform: uppercase; }
 
-        .spin-button {
+        /* Редкость */
+        .legendary { border-color: var(--gold); color: var(--gold); background: rgba(255, 204, 0, 0.05); }
+        .epic { border-color: #a333ff; color: #a333ff; }
+        .common { border-color: #3d3d4d; color: #fff; }
+
+        /* Кнопка */
+        .action-btn {
             margin-top: 40px;
-            width: 200px;
-            height: 55px;
+            width: 240px;
+            height: 60px;
             background: var(--accent);
             border: none;
-            border-radius: 15px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            box-shadow: 0 5px 20px rgba(125, 95, 255, 0.4);
+            border-radius: 18px;
+            color: #000;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.3s;
         }
 
-        .spin-button:active { transform: scale(0.95); }
-        .spin-button:disabled { background: #444; box-shadow: none; opacity: 0.6; }
-
-        .win-announcement {
-            position: absolute;
-            top: 20%;
-            font-size: 32px;
-            font-weight: bold;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: 0.5s;
+        .action-btn:disabled {
+            background: #222;
+            color: #444;
+            cursor: not-allowed;
         }
 
-        .win-announcement.show {
-            opacity: 1;
-            transform: translateY(0);
+        #result-popup {
+            position: fixed;
+            top: 15%;
+            font-size: 40px;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+            display: none;
+            z-index: 100;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <div class="win-announcement" id="winTxt">ВЫИГРЫШ!</div>
+    <div id="result-popup">+100</div>
 
-    <div class="header">
-        <h1>Quatro Premium</h1>
+    <div class="top-bar">
+        <h1>QUATRO SLOTS</h1>
     </div>
 
-    <div class="modes">
-        <div class="mode-btn active" onclick="setMode('classic', 50, this)">КЛАССИК</div>
-        <div class="mode-btn" onclick="setMode('risk', 100, this)">РИСК</div>
-        <div class="mode-btn" onclick="setMode('jackpot', 500, this)">JACKPOT</div>
+    <div class="mode-selector">
+        <div class="m-btn active" id="m-classic" onclick="changeMode('classic')">Новичок</div>
+        <div class="m-btn" id="m-risk" onclick="changeMode('risk')">Хайроллер</div>
+        <div class="m-btn" id="m-jackpot" onclick="changeMode('jackpot')">Безумие</div>
     </div>
 
-    <div class="roulette-wrapper">
-        <div class="selector"></div>
-        <div id="tape" class="tape"></div>
+    <div class="viewport">
+        <div class="pointer"></div>
+        <div id="track" class="track"></div>
     </div>
 
-    <button class="spin-button" id="spinBtn" onclick="startSpin()">КРУТИТЬ (50 🪙)</button>
+    <button class="action-btn" id="mainBtn" onclick="spin()">Крутить за 50</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        const tape = document.getElementById('tape');
-        const spinBtn = document.getElementById('spinBtn');
-        const winTxt = document.getElementById('winTxt');
-        
-        let currentMode = 'classic';
-        let isSpinning = false;
+        const track = document.getElementById('track');
+        const mainBtn = document.getElementById('mainBtn');
+        const resPopup = document.getElementById('result-popup');
 
-        const config = {
-            classic: { cost: 50, prizes: [10, 20, 50, 60, 100, 150] },
-            risk: { cost: 100, prizes: [0, 5, 10, 200, 500, 1000] },
-            jackpot: { cost: 500, prizes: [100, 200, 500, 1000, 2500, 5000] }
+        let mode = 'classic';
+        let rolling = false;
+
+        const data = {
+            classic: { cost: 50, prizes: [10, 25, 50, 75, 100, 250] },
+            risk: { cost: 150, prizes: [0, 50, 100, 300, 750, 1500] },
+            jackpot: { cost: 500, prizes: [100, 500, 1000, 2500, 5000, 10000] }
         };
 
-        function setMode(mode, cost, btn) {
-            if(isSpinning) return;
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            spinBtn.innerText = `КРУТИТЬ (${cost} 🪙)`;
-            generateItems();
+        function changeMode(m) {
+            if (rolling) return;
+            mode = m;
+            document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('m-' + m).classList.add('active');
+            mainBtn.innerText = `Крутить за ${data[mode].cost}`;
+            fillTrack();
         }
 
-        function getRareClass(val) {
-            if (val >= 1000) return 'rare-legend';
-            if (val >= 250) return 'rare-high';
-            if (val >= 100) return 'rare-med';
-            return 'rare-low';
-        }
-
-        function generateItems() {
-            tape.innerHTML = '';
-            const prizes = config[currentMode].prizes;
-            // Генерируем 80 элементов для плавности
-            for(let i = 0; i < 80; i++) {
-                const val = prizes[Math.floor(Math.random() * prizes.length)];
-                const item = document.createElement('div');
-                item.className = `item ${getRareClass(val)}`;
-                item.innerHTML = `<span>${val}</span><small>🪙</small>`;
-                tape.appendChild(item);
+        function fillTrack() {
+            track.innerHTML = '';
+            track.style.transition = 'none';
+            track.style.transform = 'translateX(0)';
+            
+            const pool = data[mode].prizes;
+            for (let i = 0; i < 90; i++) {
+                const val = pool[Math.floor(Math.random() * pool.length)];
+                const card = document.createElement('div');
+                card.className = 'card ' + (val >= 1000 ? 'legendary' : (val >= 300 ? 'epic' : 'common'));
+                card.innerHTML = `<b>${val}</b><span>фишек</span>`;
+                track.appendChild(card);
             }
-            tape.style.transition = 'none';
-            tape.style.transform = 'translateX(0)';
         }
 
-        function startSpin() {
-            if(isSpinning) return;
-            
-            isSpinning = true;
-            spinBtn.disabled = true;
-            winTxt.classList.remove('show');
-            
-            // Используем Haptic Feedback (вибрация при начале)
-            if(tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+        function spin() {
+            if (rolling) return;
+            rolling = true;
+            mainBtn.disabled = true;
+            resPopup.style.display = 'none';
 
-            const itemWidth = 100; // 90px + 10px margin
-            const winningIndex = 60 + Math.floor(Math.random() * 10);
-            const centerOffset = (window.innerWidth / 2) - (itemWidth / 2);
-            const finalPosition = -(winningIndex * itemWidth) + centerOffset;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
 
-            tape.style.transition = 'transform 5s cubic-bezier(0.15, 0, 0.05, 1)';
-            tape.style.transform = `translateX(${finalPosition}px)`;
+            const cardWidth = 102; // 90px + 12px margins
+            const winIdx = 70 + Math.floor(Math.random() * 10);
+            const shift = -(winIdx * cardWidth) + (160 - cardWidth/2);
+
+            track.style.transition = 'transform 6s cubic-bezier(0.15, 0, 0.05, 1)';
+            track.style.transform = `translateX(${shift}px)`;
 
             setTimeout(() => {
-                const winner = tape.children[winningIndex];
-                const winValue = winner.querySelector('span').innerText;
+                const winCard = track.children[winIdx];
+                const amount = winCard.querySelector('b').innerText;
                 
-                winTxt.innerText = `+ ${winValue} 🪙`;
-                winTxt.classList.add('show');
+                resPopup.innerText = '+' + amount;
+                resPopup.style.display = 'block';
                 
-                if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
+                // Передаем данные боту и позволяем крутить снова через паузу
                 setTimeout(() => {
-                    tg.sendData(winValue);
-                }, 1500);
-            }, 5200);
+                    tg.sendData(amount);
+                    // Разблокируем кнопку для повторной игры без перезагрузки
+                    rolling = false;
+                    mainBtn.disabled = false;
+                    fillTrack(); 
+                }, 2000);
+            }, 6200);
         }
 
-        // Инициализация
-        generateItems();
+        fillTrack();
     </script>
 </body>
 </html>
