@@ -6,18 +6,17 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #08080a;
-            --panel: #12121a;
+            --bg: #030305;
+            --panel: #0a0a0f;
             --accent: #00f2ff;
-            --neon-pink: #ff00ff;
-            --gold: #ffcc00;
+            --pink: #ff00ff;
             --text: #ffffff;
         }
 
         body {
-            background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg) 100%);
+            background: radial-gradient(circle at center, #121225 0%, var(--bg) 100%);
             color: var(--text);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Arial Black', sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -25,24 +24,16 @@
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
-            user-select: none;
         }
 
-        .header-box {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .header-box h1 {
+        .brand {
             font-size: 32px;
-            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            margin: 0;
-            background: linear-gradient(to right, var(--accent), var(--neon-pink));
+            background: linear-gradient(to bottom, var(--accent), var(--pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.5));
+            margin-bottom: 20px;
         }
 
         .tabs {
@@ -50,42 +41,38 @@
             background: rgba(255, 255, 255, 0.05);
             padding: 6px;
             border-radius: 20px;
-            margin-bottom: 40px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 8px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .tab {
-            padding: 12px 24px;
-            font-size: 13px;
-            font-weight: 800;
+            padding: 12px 20px;
+            font-size: 12px;
             border-radius: 15px;
             cursor: pointer;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            color: rgba(255, 255, 255, 0.3);
-            text-transform: uppercase;
+            color: #444;
+            transition: 0.3s;
         }
 
         .tab.active {
             background: var(--accent);
             color: #000;
-            box-shadow: 0 0 20px var(--accent);
-            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent);
         }
 
-        /* Увеличенная рулетка */
-        .machine-wrapper {
+        .machine {
             position: relative;
-            width: 360px;
-            height: 180px; /* Было 130, стало 180 */
+            width: 350px;
+            height: 180px;
             background: var(--panel);
+            border: 3px solid #1a1a25;
             border-radius: 30px;
-            border: 3px solid #1f1f2a;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
+            box-shadow: 0 0 40px rgba(0,0,0,1);
         }
 
-        .center-line {
+        .marker {
             position: absolute;
             left: 50%;
             top: 0;
@@ -94,20 +81,8 @@
             background: var(--accent);
             z-index: 10;
             transform: translateX(-50%);
-            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
+            box-shadow: 0 0 15px var(--accent);
         }
-
-        .center-line::before, .center-line::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-        }
-
-        .center-line::before { top: 0; border-top: 15px solid var(--accent); }
-        .center-line::after { bottom: 0; border-bottom: 15px solid var(--accent); }
 
         .strip {
             display: flex;
@@ -115,84 +90,61 @@
             position: absolute;
             height: 100%;
             left: 0;
-            will-change: transform;
         }
 
-        .item {
-            min-width: 120px; /* Было 100, стало 120 */
-            height: 140px; /* Было 100, стало 140 */
+        .slot {
+            min-width: 120px;
+            height: 140px;
             margin: 0 8px;
-            background: linear-gradient(145deg, #1e1e2d, #14141e);
+            background: #0f0f15;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .item b { 
-            font-size: 38px; /* Увеличил текст цифр */
-            margin-bottom: 5px; 
-            text-shadow: 0 0 10px rgba(255,255,255,0.2);
-        }
+        .slot b { font-size: 36px; color: #fff; }
+        .slot span { font-size: 10px; opacity: 0.3; letter-spacing: 1px; }
 
-        .item span { 
-            font-size: 11px; 
-            opacity: 0.4; 
-            text-transform: uppercase; 
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .btn-main {
-            margin-top: 50px;
+        .btn-spin {
+            margin-top: 40px;
             width: 280px;
             height: 70px;
-            background: linear-gradient(45deg, var(--accent), var(--neon-pink));
+            background: linear-gradient(45deg, var(--accent), var(--pink));
             border: none;
             border-radius: 25px;
             color: #fff;
             font-size: 22px;
             font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 2px;
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
-            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-main:active { transform: scale(0.92); }
-        .btn-main:disabled { background: #222; box-shadow: none; color: #444; opacity: 0.5; }
+        .btn-spin:disabled { opacity: 0.2; }
 
-        #win-popup {
+        #popup {
             position: fixed;
             top: 15%;
             font-size: 60px;
             font-weight: 900;
-            z-index: 100;
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent);
             display: none;
-            background: linear-gradient(to bottom, #fff, var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 20px var(--accent));
-            animation: pop 0.5s ease-out;
-        }
-
-        @keyframes pop {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+            z-index: 100;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 40px;
+            border-radius: 20px;
+            border: 2px solid var(--accent);
         }
     </style>
 </head>
 <body>
 
-    <div id="win-popup">+0</div>
-
-    <div class="header-box">
-        <h1>QUATRO SLOTS</h1>
-    </div>
+    <div id="popup">+0</div>
+    <div class="brand">QUATRO SLOTS</div>
 
     <div class="tabs">
         <div class="tab active" onclick="setMode('easy', 50, this)">ЛУДОМАН</div>
@@ -200,32 +152,33 @@
         <div class="tab" onclick="setMode('hard', 1000, this)">ALL-IN</div>
     </div>
 
-    <div class="machine-wrapper">
-        <div class="center-line"></div>
+    <div class="machine">
+        <div class="marker"></div>
         <div id="strip" class="strip"></div>
     </div>
 
-    <button class="btn-main" id="spinBtn" onclick="play()">КРУТИТЬ — 50</button>
+    <button class="btn-spin" id="spinBtn" onclick="play()">КРУТИТЬ — 50</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         const strip = document.getElementById('strip');
         const spinBtn = document.getElementById('spinBtn');
-        const winPopup = document.getElementById('win-popup');
+        const popup = document.getElementById('popup');
 
-        let currentMode = 'easy';
-        let isRolling = false;
-        const itemWidth = 136; // 120px + 16px (8+8 margins)
+        let mode = 'easy';
+        let busy = false;
+        const fullWidth = 136; // 120px + 16px margins
 
-        const config = {
-            easy: { cost: 50, values: [10, 25, 50, 75, 100, 250] },
-            mid: { cost: 150, values: [0, 50, 100, 500, 1000] },
-            hard: { cost: 1000, values: [500, 1000, 5000, 10000] }
+        // ТУТ МЫ ПОНИЗИЛИ ШАНСЫ (добавили больше мелких чисел)
+        const data = {
+            easy: { cost: 50, prizes: [0, 5, 10, 10, 25, 25, 50, 100] },
+            mid: { cost: 150, prizes: [0, 0, 50, 50, 100, 150, 300, 1000] },
+            hard: { cost: 1000, prizes: [0, 100, 100, 500, 1000, 5000, 10000] }
         };
 
         function setMode(m, price, el) {
-            if (isRolling) return;
-            currentMode = m;
+            if (busy) return;
+            mode = m;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             spinBtn.innerText = `КРУТИТЬ — ${price}`;
@@ -236,50 +189,51 @@
             strip.style.transition = 'none';
             strip.style.transform = 'translateX(0)';
             strip.innerHTML = '';
-            
-            const pool = config[currentMode].values;
-            for (let i = 0; i < 100; i++) {
+            const pool = data[mode].prizes;
+            for (let i = 0; i < 90; i++) {
                 const val = pool[Math.floor(Math.random() * pool.length)];
-                const item = document.createElement('div');
-                item.className = 'item';
-                item.innerHTML = `<b>${val}</b><span>ФИШЕК</span>`;
-                strip.appendChild(item);
+                const slot = document.createElement('div');
+                slot.className = 'slot';
+                slot.innerHTML = `<b>${val}</b><span>ФИШЕК</span>`;
+                strip.appendChild(slot);
             }
         }
 
         function play() {
-            if (isRolling) return;
-            isRolling = true;
+            if (busy) return;
+            busy = true;
             spinBtn.disabled = true;
-            winPopup.style.display = 'none';
+            popup.style.display = 'none';
 
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            const winIdx = 75 + Math.floor(Math.random() * 15);
-            const winVal = strip.children[winIdx].querySelector('b').innerText;
+            // Выбираем индекс заранее
+            const winIdx = 70 + Math.floor(Math.random() * 10);
+            const winCard = strip.children[winIdx];
+            const finalWinValue = winCard.querySelector('b').innerText; // СТРОГОЕ ЗНАЧЕНИЕ
 
-            const wrapperWidth = 360;
-            const finalShift = -(winIdx * itemWidth) + (wrapperWidth / 2 - itemWidth / 2);
+            const centerOffset = (350 / 2) - (fullWidth / 2);
+            const finalPos = -(winIdx * fullWidth) + centerOffset;
 
-            strip.style.transition = 'transform 7s cubic-bezier(0.1, 0, 0, 1)';
-            strip.style.transform = `translateX(${finalShift}px)`;
+            strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
+            strip.style.transform = `translateX(${finalPos}px)`;
 
             setTimeout(() => {
-                winPopup.innerText = `+${winVal}`;
-                winPopup.style.display = 'block';
+                // Показываем именно то, что выбили
+                popup.innerText = `+${finalWinValue}`;
+                popup.style.display = 'block';
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
                 setTimeout(() => {
-                    tg.sendData(winVal);
-                    
+                    tg.sendData(finalWinValue);
                     setTimeout(() => {
-                        isRolling = false;
+                        busy = false;
                         spinBtn.disabled = false;
                         init(); 
                     }, 1000);
                 }, 1500);
-            }, 7200);
+            }, 6200);
         }
 
         init();
