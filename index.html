@@ -3,38 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quatro Casino - Web App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #030305;
-            --accent: #00f2ff;
-            --pink: #ff00ff;
-            --text: #ffffff;
+            --bg-color: #030305;
+            --accent-color: #00f2ff;
+            --pink-color: #ff00ff;
+            --card-bg: #0a0a0f;
+            --text-color: #ffffff;
         }
 
         body {
-            background: radial-gradient(circle at center, #121225 0%, var(--bg) 100%);
-            color: var(--text);
-            font-family: 'Arial Black', sans-serif;
+            background: radial-gradient(circle at center, #121225 0%, var(--bg-color) 100%);
+            color: var(--text-color);
+            font-family: 'Arial Black', 'Arial', sans-serif;
             margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
-        .brand {
-            font-size: 36px; /* Увеличено */
+        .brand-title {
+            font-size: 36px;
+            font-weight: 900;
             text-transform: uppercase;
-            background: linear-gradient(to bottom, var(--accent), var(--pink));
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            background: linear-gradient(to bottom, var(--accent-color), var(--pink-color));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 30px;
             filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.5));
         }
 
+        /* ТАБЫ РЕЖИМОВ */
         .tabs {
             display: flex;
             background: rgba(255, 255, 255, 0.05);
@@ -42,47 +49,67 @@
             border-radius: 20px;
             gap: 10px;
             margin-bottom: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .tab {
             padding: 14px 22px;
             font-size: 13px;
+            font-weight: bold;
             border-radius: 16px;
             cursor: pointer;
             color: #555;
-            transition: 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
         }
 
         .tab.active {
-            background: var(--accent);
+            background: var(--accent-color);
             color: #000;
-            box-shadow: 0 0 20px var(--accent);
+            box-shadow: 0 0 20px var(--accent-color);
         }
 
-        .machine {
+        /* КАЗИНО МАШИНА */
+        .slot-machine {
             position: relative;
-            width: 380px; /* Увеличено */
-            height: 220px; /* Увеличено */
+            width: 380px;
+            height: 220px;
             background: #0a0a0f;
             border: 4px solid #1a1a25;
             border-radius: 35px;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .marker {
+        .pointer {
             position: absolute;
             left: 50%;
             top: 0;
             bottom: 0;
             width: 5px;
-            background: var(--accent);
+            background: var(--accent-color);
             z-index: 10;
             transform: translateX(-50%);
-            box-shadow: 0 0 20px var(--accent);
+            box-shadow: 0 0 20px var(--accent-color);
         }
 
-        .strip {
+        .pointer::before, .pointer::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+        }
+
+        .pointer::after {
+            bottom: 0;
+            clip-path: polygon(50% 0%, 0 100%, 100% 100%);
+        }
+
+        .strip-container {
             display: flex;
             align-items: center;
             position: absolute;
@@ -91,9 +118,9 @@
             will-change: transform;
         }
 
-        .slot {
-            min-width: 140px; /* Увеличено */
-            height: 170px; /* Увеличено */
+        .slot-item {
+            min-width: 140px;
+            height: 170px;
             margin: 0 10px;
             background: linear-gradient(145deg, #151520, #0a0a0f);
             border-radius: 25px;
@@ -101,160 +128,215 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             box-sizing: border-box;
+            transition: 0.3s;
         }
 
-        .slot b { 
-            font-size: 46px; /* Очень крупные цифры */
-            color: #fff; 
-            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+        .slot-item b {
+            font-size: 46px;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
-        
-        .slot span { 
-            font-size: 11px; 
-            opacity: 0.4; 
+
+        .slot-item span {
+            font-size: 11px;
+            color: var(--accent-color);
+            opacity: 0.4;
             text-transform: uppercase;
             margin-top: 5px;
+            letter-spacing: 1px;
         }
 
+        /* КНОПКА */
         .btn-spin {
             margin-top: 50px;
             width: 320px;
             height: 85px;
-            background: linear-gradient(45deg, var(--accent), var(--pink));
+            background: linear-gradient(45deg, var(--accent-color), var(--pink-color));
             border: none;
             border-radius: 25px;
-            color: #fff;
+            color: #ffffff;
             font-size: 26px;
             font-weight: 900;
             text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
             box-shadow: 0 12px 35px rgba(255, 0, 255, 0.4);
-            transition: 0.2s;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .btn-spin:active { transform: scale(0.95); }
-        .btn-spin:disabled { opacity: 0.3; filter: grayscale(1); }
+        .btn-spin:active {
+            transform: scale(0.95) translateY(4px);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.3);
+        }
 
-        #popup {
+        .btn-spin:disabled {
+            filter: grayscale(1);
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ПОПАП ВЫИГРЫША */
+        #winPopup {
             position: fixed;
             top: 10%;
             font-size: 70px;
             font-weight: 900;
-            color: var(--accent);
-            text-shadow: 0 0 30px var(--accent);
+            color: var(--accent-color);
+            text-shadow: 0 0 30px var(--accent-color);
             display: none;
             z-index: 100;
             background: rgba(0,0,0,0.9);
             padding: 15px 50px;
             border-radius: 25px;
-            border: 3px solid var(--accent);
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid var(--accent-color);
+            animation: winAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes popIn {
+        @keyframes winAnim {
             from { transform: scale(0.5); opacity: 0; }
             to { transform: scale(1); opacity: 1; }
+        }
+
+        .balance-info {
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.6;
+            color: var(--accent-color);
         }
     </style>
 </head>
 <body>
 
-    <div id="popup">+0</div>
-    <div class="brand">QUATRO SLOTS</div>
+    <div id="winPopup">+0</div>
+    
+    <div class="brand-title">QUATRO SLOTS</div>
 
     <div class="tabs">
-        <div class="tab active" onclick="setMode('easy', 50, this)">ЛУДОМАН</div>
-        <div class="tab" onclick="setMode('mid', 150, this)">МАЖОР</div>
-        <div class="tab" onclick="setMode('hard', 1000, this)">ALL-IN</div>
+        <div class="tab active" onclick="changeMode('easy', 50, this)">ЛУДОМАН</div>
+        <div class="tab" onclick="changeMode('mid', 150, this)">МАЖОР</div>
+        <div class="tab" onclick="changeMode('hard', 1000, this)">ALL-IN</div>
     </div>
 
-    <div class="machine">
-        <div class="marker"></div>
-        <div id="strip" class="strip"></div>
+    <div class="slot-machine">
+        <div class="pointer"></div>
+        <div id="strip" class="strip-container">
+            </div>
     </div>
 
-    <button class="btn-spin" id="spinBtn" onclick="play()">КРУТИТЬ — 50</button>
+    <button class="btn-spin" id="spinButton" onclick="startSpin()">КРУТИТЬ — 50</button>
+    
+    <div class="balance-info" id="localBalanceDisplay">Загрузка баланса...</div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        tg.expand();
+
         const strip = document.getElementById('strip');
-        const spinBtn = document.getElementById('spinBtn');
-        const popup = document.getElementById('popup');
+        const spinButton = document.getElementById('spinButton');
+        const winPopup = document.getElementById('winPopup');
+        const balanceDisplay = document.getElementById('localBalanceDisplay');
 
-        let mode = 'easy';
-        let busy = false;
-        const slotFullWidth = 160; // 140px card + 20px margins
+        // СИНХРОНИЗАЦИЯ: Получаем баланс из URL
+        const params = new URLSearchParams(window.location.search);
+        let currentBalance = parseInt(params.get('balance')) || 0;
+        balanceDisplay.innerText = `Ваш баланс: ${currentBalance} 🪙`;
 
-        // ШАНСЫ: Немного увеличил вероятность выигрыша (меньше нулей)
-        const config = {
-            easy: { cost: 50, pool: [0, 5, 10, 10, 10, 25, 25, 50, 75, 100] },
-            mid: { cost: 150, pool: [0, 50, 50, 100, 100, 150, 250, 500, 1000] },
-            hard: { cost: 1000, pool: [0, 500, 1000, 2500, 5000, 10000] }
+        let currentMode = 'easy';
+        let isSpinning = false;
+        const slotWidth = 160; // 140px ширина + 20px margin
+
+        const gameSettings = {
+            easy: { cost: 50, prizes: [0, 5, 10, 10, 10, 25, 25, 50, 75, 100, 150, 200] },
+            mid: { cost: 150, prizes: [0, 50, 50, 100, 100, 150, 250, 500, 750, 1000] },
+            hard: { cost: 1000, prizes: [0, 500, 1000, 2000, 5000, 10000] }
         };
 
-        function setMode(m, price, el) {
-            if (busy) return;
-            mode = m;
+        function changeMode(mode, price, element) {
+            if (isSpinning) return;
+            currentMode = mode;
+            
+            // Смена активного таба
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            spinBtn.innerText = `КРУТИТЬ — ${price}`;
-            init();
+            element.classList.add('active');
+            
+            spinButton.innerText = `КРУТИТЬ — ${price}`;
+            initSlots();
         }
 
-        function init() {
+        function initSlots() {
             strip.style.transition = 'none';
             strip.style.transform = 'translateX(0)';
             strip.innerHTML = '';
-            const prizes = config[mode].pool;
+            
+            const pool = gameSettings[currentMode].prizes;
+            // Генерируем 90 слотов для длинной прокрутки
             for (let i = 0; i < 90; i++) {
-                const val = prizes[Math.floor(Math.random() * prizes.length)];
-                const slot = document.createElement('div');
-                slot.className = 'slot';
-                slot.innerHTML = `<b>${val}</b><span>фишек</span>`;
-                strip.appendChild(slot);
+                const val = pool[Math.floor(Math.random() * pool.length)];
+                const div = document.createElement('div');
+                div.className = 'slot-item';
+                div.innerHTML = `<b>${val}</b><span>фишек</span>`;
+                strip.appendChild(div);
             }
         }
 
-        function play() {
-            if (busy) return;
-            busy = true;
-            spinBtn.disabled = true;
-            popup.style.display = 'none';
+        function startSpin() {
+            if (isSpinning) return;
+            
+            const cost = gameSettings[currentMode].cost;
 
+            // ПРОВЕРКА БАЛАНСА
+            if (currentBalance < cost) {
+                tg.showAlert("❌ Недостаточно фишек для игры!");
+                return;
+            }
+
+            isSpinning = true;
+            spinButton.disabled = true;
+            winPopup.style.display = 'none';
+
+            // Тактильная отдача
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            const targetIdx = 65 + Math.floor(Math.random() * 15);
-            
-            // Расчет центра: (ширина контейнера 380 / 2) - (ширина слота 160 / 2) = 110
-            const finalPos = -(targetIdx * slotFullWidth) + 110;
+            // Выбираем случайный целевой слот (в районе 70-85 индекса)
+            const targetIndex = 70 + Math.floor(Math.random() * 15);
+            const offset = (targetIndex * slotWidth) - (380 / 2) + (slotWidth / 2);
 
             strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0.1, 1)';
-            strip.style.transform = `translateX(${finalPos}px)`;
+            strip.style.transform = `translateX(-${offset}px)`;
 
             setTimeout(() => {
-                const winnerElement = strip.children[targetIdx];
-                const finalValue = winnerElement.querySelector('b').innerText;
+                const winningSlot = strip.children[targetIndex];
+                const winValue = parseInt(winningSlot.querySelector('b').innerText);
 
-                popup.innerText = `+${finalValue}`;
-                popup.style.display = 'block';
-                
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                // Показываем выигрыш
+                winPopup.innerText = `+${winValue}`;
+                winPopup.style.display = 'block';
 
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred(winValue > 0 ? 'success' : 'warning');
+
+                // ОБНОВЛЯЕМ ЛОКАЛЬНЫЙ БАЛАНС
+                currentBalance = currentBalance - cost + winValue;
+                balanceDisplay.innerText = `Ваш баланс: ${currentBalance} 🪙`;
+
+                // ОТПРАВКА ДАННЫХ БОТУ ЧЕРЕЗ 1.5 СЕКУНДЫ
                 setTimeout(() => {
-                    tg.sendData(finalValue);
+                    tg.sendData(`win:${winValue}|cost:${cost}`);
+                    
+                    // Закрываем приложение через полсекунды после отправки данных
                     setTimeout(() => {
-                        busy = false;
-                        spinBtn.disabled = false;
-                        init(); 
-                    }, 1000);
+                        tg.close();
+                    }, 500);
                 }, 1500);
+
             }, 6200);
         }
 
-        init();
-        tg.expand();
+        // Инициализация при загрузке
+        initSlots();
     </script>
 </body>
 </html>
