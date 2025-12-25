@@ -6,16 +6,18 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg: #050505;
-            --card: #111116;
+            --bg: #08080a;
+            --panel: #12121a;
             --accent: #00f2ff;
+            --neon-pink: #ff00ff;
+            --gold: #ffcc00;
             --text: #ffffff;
         }
 
         body {
-            background-color: var(--bg);
+            background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg) 100%);
             color: var(--text);
-            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             display: flex;
             flex-direction: column;
@@ -23,60 +25,89 @@
             justify-content: center;
             min-height: 100vh;
             overflow: hidden;
+            user-select: none;
         }
 
-        .brand {
-            font-size: 26px;
-            letter-spacing: 2px;
-            color: var(--accent);
-            margin-bottom: 20px;
+        .header-box {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-box h1 {
+            font-size: 32px;
+            font-weight: 900;
             text-transform: uppercase;
+            letter-spacing: 5px;
+            margin: 0;
+            background: linear-gradient(to right, var(--accent), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.5));
         }
 
         .tabs {
             display: flex;
-            background: #111;
-            padding: 5px;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            border: 1px solid #222;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .tab {
-            padding: 10px 15px;
-            font-size: 11px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 13px;
+            font-weight: 800;
+            border-radius: 15px;
             cursor: pointer;
-            color: #444;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: rgba(255, 255, 255, 0.3);
             text-transform: uppercase;
         }
 
         .tab.active {
-            background: #1a1a25;
-            color: var(--accent);
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 20px var(--accent);
+            transform: scale(1.05);
         }
 
-        .machine {
+        /* Увеличенная рулетка */
+        .machine-wrapper {
             position: relative;
-            width: 320px;
-            height: 130px;
-            background: var(--card);
-            border-radius: 15px;
-            border: 2px solid #1f1f2a;
+            width: 360px;
+            height: 180px; /* Было 130, стало 180 */
+            background: var(--panel);
+            border-radius: 30px;
+            border: 3px solid #1f1f2a;
             overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .marker {
+        .center-line {
             position: absolute;
             left: 50%;
             top: 0;
             bottom: 0;
-            width: 3px;
+            width: 4px;
             background: var(--accent);
             z-index: 10;
             transform: translateX(-50%);
-            box-shadow: 0 0 15px var(--accent);
+            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent);
         }
+
+        .center-line::before, .center-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+        }
+
+        .center-line::before { top: 0; border-top: 15px solid var(--accent); }
+        .center-line::after { bottom: 0; border-bottom: 15px solid var(--accent); }
 
         .strip {
             display: flex;
@@ -87,59 +118,81 @@
             will-change: transform;
         }
 
-        .slot {
-            min-width: 100px;
-            height: 100px;
-            margin: 0 5px;
-            background: #0a0a0f;
-            border-radius: 10px;
+        .item {
+            min-width: 120px; /* Было 100, стало 120 */
+            height: 140px; /* Было 100, стало 140 */
+            margin: 0 8px;
+            background: linear-gradient(145deg, #1e1e2d, #14141e);
+            border-radius: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 1px solid #1a1a25;
-            box-sizing: border-box;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: 0.3s;
         }
 
-        .slot b { font-size: 28px; color: #fff; }
-        .slot span { font-size: 10px; opacity: 0.4; text-transform: uppercase; }
+        .item b { 
+            font-size: 38px; /* Увеличил текст цифр */
+            margin-bottom: 5px; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.2);
+        }
 
-        .btn-spin {
-            margin-top: 30px;
-            width: 240px;
-            height: 60px;
-            background: var(--accent);
+        .item span { 
+            font-size: 11px; 
+            opacity: 0.4; 
+            text-transform: uppercase; 
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .btn-main {
+            margin-top: 50px;
+            width: 280px;
+            height: 70px;
+            background: linear-gradient(45deg, var(--accent), var(--neon-pink));
             border: none;
-            border-radius: 15px;
-            color: #000;
-            font-size: 18px;
+            border-radius: 25px;
+            color: #fff;
+            font-size: 22px;
             font-weight: 900;
             text-transform: uppercase;
+            letter-spacing: 2px;
             cursor: pointer;
+            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
+            transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-spin:disabled { background: #222; color: #444; }
+        .btn-main:active { transform: scale(0.92); }
+        .btn-main:disabled { background: #222; box-shadow: none; color: #444; opacity: 0.5; }
 
-        #popup {
+        #win-popup {
             position: fixed;
-            top: 12%;
-            font-size: 45px;
+            top: 15%;
+            font-size: 60px;
             font-weight: 900;
-            color: var(--accent);
             z-index: 100;
             display: none;
-            text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
-            background: rgba(0,0,0,0.8);
-            padding: 5px 20px;
-            border-radius: 15px;
-            border: 1px solid var(--accent);
+            background: linear-gradient(to bottom, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px var(--accent));
+            animation: pop 0.5s ease-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-    <div id="popup">0</div>
-    <div class="brand">QUATRO SLOTS</div>
+    <div id="win-popup">+0</div>
+
+    <div class="header-box">
+        <h1>QUATRO SLOTS</h1>
+    </div>
 
     <div class="tabs">
         <div class="tab active" onclick="setMode('easy', 50, this)">ЛУДОМАН</div>
@@ -147,24 +200,22 @@
         <div class="tab" onclick="setMode('hard', 1000, this)">ALL-IN</div>
     </div>
 
-    <div class="machine">
-        <div class="marker"></div>
+    <div class="machine-wrapper">
+        <div class="center-line"></div>
         <div id="strip" class="strip"></div>
     </div>
 
-    <button class="btn-spin" id="spinBtn" onclick="play()">КРУТИТЬ — 50</button>
+    <button class="btn-main" id="spinBtn" onclick="play()">КРУТИТЬ — 50</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         const strip = document.getElementById('strip');
         const spinBtn = document.getElementById('spinBtn');
-        const popup = document.getElementById('popup');
+        const winPopup = document.getElementById('win-popup');
 
-        let mode = 'easy';
-        let busy = false;
-        const slotWidth = 100; // Ширина слота
-        const slotMargin = 10; // Суммарный отступ (5px + 5px)
-        const itemFullWidth = slotWidth + slotMargin; 
+        let currentMode = 'easy';
+        let isRolling = false;
+        const itemWidth = 136; // 120px + 16px (8+8 margins)
 
         const config = {
             easy: { cost: 50, values: [10, 25, 50, 75, 100, 250] },
@@ -173,8 +224,8 @@
         };
 
         function setMode(m, price, el) {
-            if (busy) return;
-            mode = m;
+            if (isRolling) return;
+            currentMode = m;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             spinBtn.innerText = `КРУТИТЬ — ${price}`;
@@ -186,56 +237,49 @@
             strip.style.transform = 'translateX(0)';
             strip.innerHTML = '';
             
-            const pool = config[mode].values;
-            // Создаем ленту из 100 элементов
+            const pool = config[currentMode].values;
             for (let i = 0; i < 100; i++) {
                 const val = pool[Math.floor(Math.random() * pool.length)];
-                const slot = document.createElement('div');
-                slot.className = 'slot';
-                slot.innerHTML = `<b>${val}</b><span>фишек</span>`;
-                strip.appendChild(slot);
+                const item = document.createElement('div');
+                item.className = 'item';
+                item.innerHTML = `<b>${val}</b><span>ФИШЕК</span>`;
+                strip.appendChild(item);
             }
         }
 
         function play() {
-            if (busy) return;
-            busy = true;
+            if (isRolling) return;
+            isRolling = true;
             spinBtn.disabled = true;
-            popup.style.display = 'none';
+            winPopup.style.display = 'none';
 
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            // 1. Выбираем случайный слот в конце ленты (например, между 70 и 90)
-            const winIdx = 70 + Math.floor(Math.random() * 20);
-            const winValue = strip.children[winIdx].querySelector('b').innerText;
+            const winIdx = 75 + Math.floor(Math.random() * 15);
+            const winVal = strip.children[winIdx].querySelector('b').innerText;
 
-            // 2. Рассчитываем позицию так, чтобы этот слот был ровно посередине
-            const viewPortWidth = 320;
-            const centerOffset = (viewPortWidth / 2) - (itemFullWidth / 2);
-            const finalPos = -(winIdx * itemFullWidth) + centerOffset;
+            const wrapperWidth = 360;
+            const finalShift = -(winIdx * itemWidth) + (wrapperWidth / 2 - itemWidth / 2);
 
-            // 3. Запускаем анимацию
-            strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
-            strip.style.transform = `translateX(${finalPos}px)`;
+            strip.style.transition = 'transform 7s cubic-bezier(0.1, 0, 0, 1)';
+            strip.style.transform = `translateX(${finalShift}px)`;
 
             setTimeout(() => {
-                // 4. Показываем результат, взятый прямо из выбранного слота
-                popup.innerText = `+${winValue}`;
-                popup.style.display = 'block';
+                winPopup.innerText = `+${winVal}`;
+                winPopup.style.display = 'block';
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
                 setTimeout(() => {
-                    // Отправляем именно то значение, которое выпало визуально
-                    tg.sendData(winValue); 
+                    tg.sendData(winVal);
                     
                     setTimeout(() => {
-                        busy = false;
+                        isRolling = false;
                         spinBtn.disabled = false;
-                        init(); // Сброс для следующей игры
+                        init(); 
                     }, 1000);
                 }, 1500);
-            }, 6200);
+            }, 7200);
         }
 
         init();
