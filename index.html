@@ -48,6 +48,7 @@
             border-radius: 8px;
             cursor: pointer;
             color: #444;
+            text-transform: uppercase;
         }
 
         .tab.active {
@@ -57,7 +58,7 @@
 
         .machine {
             position: relative;
-            width: 320px; /* Фиксированная ширина контейнера */
+            width: 320px;
             height: 130px;
             background: var(--card);
             border-radius: 15px;
@@ -87,7 +88,7 @@
         }
 
         .slot {
-            min-width: 100px; /* Фиксированная ширина слота */
+            min-width: 100px;
             height: 100px;
             margin: 0 5px;
             background: #0a0a0f;
@@ -123,10 +124,15 @@
             position: fixed;
             top: 12%;
             font-size: 45px;
+            font-weight: 900;
             color: var(--accent);
             z-index: 100;
             display: none;
             text-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            background: rgba(0,0,0,0.8);
+            padding: 5px 20px;
+            border-radius: 15px;
+            border: 1px solid var(--accent);
         }
     </style>
 </head>
@@ -156,7 +162,9 @@
 
         let mode = 'easy';
         let busy = false;
-        const itemFullWidth = 110; // 100px ширина + 10px (5px отступы с каждой стороны)
+        const slotWidth = 100; // Ширина слота
+        const slotMargin = 10; // Суммарный отступ (5px + 5px)
+        const itemFullWidth = slotWidth + slotMargin; 
 
         const config = {
             easy: { cost: 50, values: [10, 25, 50, 75, 100, 250] },
@@ -179,7 +187,7 @@
             strip.innerHTML = '';
             
             const pool = config[mode].values;
-            // Генерируем 100 слотов
+            // Создаем ленту из 100 элементов
             for (let i = 0; i < 100; i++) {
                 const val = pool[Math.floor(Math.random() * pool.length)];
                 const slot = document.createElement('div');
@@ -197,36 +205,34 @@
 
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            // 1. Выбираем индекс победителя (от 70 до 85 слота)
-            const winIdx = 70 + Math.floor(Math.random() * 15);
-            
-            // 2. Рассчитываем точное смещение для остановки центра слота под маркером
-            // (320 / 2) - это центр контейнера machine
-            const centerOfMachine = 160; 
-            const centerOfSlot = itemFullWidth / 2;
-            const finalPos = -(winIdx * itemFullWidth) + (centerOfMachine - centerOfSlot);
+            // 1. Выбираем случайный слот в конце ленты (например, между 70 и 90)
+            const winIdx = 70 + Math.floor(Math.random() * 20);
+            const winValue = strip.children[winIdx].querySelector('b').innerText;
 
+            // 2. Рассчитываем позицию так, чтобы этот слот был ровно посередине
+            const viewPortWidth = 320;
+            const centerOffset = (viewPortWidth / 2) - (itemFullWidth / 2);
+            const finalPos = -(winIdx * itemFullWidth) + centerOffset;
+
+            // 3. Запускаем анимацию
             strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
             strip.style.transform = `translateX(${finalPos}px)`;
 
             setTimeout(() => {
-                // 3. Берем данные именно из того слота, который физически оказался под стрелкой
-                const winSlot = strip.children[winIdx];
-                const amount = winSlot.querySelector('b').innerText;
-                
-                popup.innerText = `+${amount}`;
+                // 4. Показываем результат, взятый прямо из выбранного слота
+                popup.innerText = `+${winValue}`;
                 popup.style.display = 'block';
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
                 setTimeout(() => {
-                    tg.sendData(amount); // Отправляем в бота
+                    // Отправляем именно то значение, которое выпало визуально
+                    tg.sendData(winValue); 
                     
-                    // 4. Сброс состояния для возможности повторной игры
                     setTimeout(() => {
                         busy = false;
                         spinBtn.disabled = false;
-                        init(); // Перезапуск ленты
+                        init(); // Сброс для следующей игры
                     }, 1000);
                 }, 1500);
             }, 6200);
