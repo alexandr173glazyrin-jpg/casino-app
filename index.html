@@ -110,34 +110,40 @@
 
         .btn-spin {
             margin-top: 40px;
-            width: 280px;
-            height: 70px;
+            width: 300px;
+            height: 75px;
             background: linear-gradient(45deg, var(--accent), var(--pink));
             border: none;
             border-radius: 25px;
             color: #fff;
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 900;
             text-transform: uppercase;
             cursor: pointer;
             box-shadow: 0 10px 30px rgba(255, 0, 255, 0.3);
         }
 
-        .btn-spin:disabled { opacity: 0.2; }
+        .btn-spin:disabled { opacity: 0.2; transform: scale(0.95); }
 
         #popup {
             position: fixed;
-            top: 15%;
-            font-size: 60px;
+            top: 12%;
+            font-size: 65px;
             font-weight: 900;
             color: var(--accent);
-            text-shadow: 0 0 20px var(--accent);
+            text-shadow: 0 0 25px var(--accent);
             display: none;
             z-index: 100;
-            background: rgba(0,0,0,0.8);
-            padding: 10px 40px;
-            border-radius: 20px;
+            background: rgba(0,0,0,0.85);
+            padding: 15px 50px;
+            border-radius: 25px;
             border: 2px solid var(--accent);
+            animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes bounceIn {
+            from { transform: scale(0.3); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -167,13 +173,13 @@
 
         let mode = 'easy';
         let busy = false;
-        const fullWidth = 136; // 120px + 16px margins
+        const itemFullWidth = 136; // 120px card + 16px margins
 
-        // ТУТ МЫ ПОНИЗИЛИ ШАНСЫ (добавили больше мелких чисел)
-        const data = {
-            easy: { cost: 50, prizes: [0, 5, 10, 10, 25, 25, 50, 100] },
-            mid: { cost: 150, prizes: [0, 0, 50, 50, 100, 150, 300, 1000] },
-            hard: { cost: 1000, prizes: [0, 100, 100, 500, 1000, 5000, 10000] }
+        // ПОНИЖЕННЫЕ ШАНСЫ: много нулей и мелких сумм
+        const config = {
+            easy: { cost: 50, pool: [0, 0, 5, 5, 10, 10, 10, 25, 50, 100] },
+            mid: { cost: 150, pool: [0, 0, 0, 50, 50, 100, 150, 250, 500, 1000] },
+            hard: { cost: 1000, pool: [0, 0, 0, 0, 500, 500, 1000, 5000, 10000] }
         };
 
         function setMode(m, price, el) {
@@ -189,9 +195,11 @@
             strip.style.transition = 'none';
             strip.style.transform = 'translateX(0)';
             strip.innerHTML = '';
-            const pool = data[mode].prizes;
-            for (let i = 0; i < 90; i++) {
-                const val = pool[Math.floor(Math.random() * pool.length)];
+            
+            const prizes = config[mode].pool;
+            // Генерируем 100 элементов
+            for (let i = 0; i < 100; i++) {
+                const val = prizes[Math.floor(Math.random() * prizes.length)];
                 const slot = document.createElement('div');
                 slot.className = 'slot';
                 slot.innerHTML = `<b>${val}</b><span>ФИШЕК</span>`;
@@ -207,30 +215,36 @@
 
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            // Выбираем индекс заранее
-            const winIdx = 70 + Math.floor(Math.random() * 10);
+            // 1. ВЫБИРАЕМ КАРТОЧКУ (индекс от 70 до 85)
+            const winIdx = 70 + Math.floor(Math.random() * 15);
+            
+            // 2. БЕРЕМ ЗНАЧЕНИЕ ПРЯМО ИЗ ЭТОЙ КАРТОЧКИ
             const winCard = strip.children[winIdx];
-            const finalWinValue = winCard.querySelector('b').innerText; // СТРОГОЕ ЗНАЧЕНИЕ
+            const realAmount = winCard.querySelector('b').innerText;
 
-            const centerOffset = (350 / 2) - (fullWidth / 2);
-            const finalPos = -(winIdx * fullWidth) + centerOffset;
+            // 3. СЧИТАЕМ ПОЗИЦИЮ ДЛЯ ЭТОГО ИНДЕКСА
+            const machineWidth = 350;
+            const centerShift = (machineWidth / 2) - (itemFullWidth / 2);
+            const finalPos = -(winIdx * itemFullWidth) + centerShift;
 
+            // 4. КРУТИМ
             strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0, 1)';
             strip.style.transform = `translateX(${finalPos}px)`;
 
             setTimeout(() => {
-                // Показываем именно то, что выбили
-                popup.innerText = `+${finalWinValue}`;
+                // ПОКАЗЫВАЕМ ТОЛЬКО ТО, ЧТО БЫЛО В ВЫБРАННОЙ КАРТОЧКЕ
+                popup.innerText = `+${realAmount}`;
                 popup.style.display = 'block';
                 
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
 
                 setTimeout(() => {
-                    tg.sendData(finalWinValue);
+                    tg.sendData(realAmount);
+                    
                     setTimeout(() => {
                         busy = false;
                         spinBtn.disabled = false;
-                        init(); 
+                        init(); // СБРОС И ОБНОВЛЕНИЕ ЛЕНТЫ
                     }, 1000);
                 }, 1500);
             }, 6200);
