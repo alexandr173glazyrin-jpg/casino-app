@@ -26,59 +26,60 @@
         }
 
         .brand {
-            font-size: 28px;
+            font-size: 36px; /* Увеличено */
             text-transform: uppercase;
             background: linear-gradient(to bottom, var(--accent), var(--pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 20px;
-            filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.4));
+            margin-bottom: 30px;
+            filter: drop-shadow(0 0 12px rgba(0, 242, 255, 0.5));
         }
 
         .tabs {
             display: flex;
             background: rgba(255, 255, 255, 0.05);
-            padding: 5px;
-            border-radius: 15px;
-            gap: 5px;
-            margin-bottom: 25px;
+            padding: 8px;
+            border-radius: 20px;
+            gap: 10px;
+            margin-bottom: 35px;
         }
 
         .tab {
-            padding: 10px 15px;
-            font-size: 11px;
-            border-radius: 12px;
+            padding: 14px 22px;
+            font-size: 13px;
+            border-radius: 16px;
             cursor: pointer;
-            color: #444;
+            color: #555;
+            transition: 0.3s;
         }
 
         .tab.active {
             background: var(--accent);
             color: #000;
-            box-shadow: 0 0 15px var(--accent);
+            box-shadow: 0 0 20px var(--accent);
         }
 
         .machine {
             position: relative;
-            width: 320px;
-            height: 160px;
+            width: 380px; /* Увеличено */
+            height: 220px; /* Увеличено */
             background: #0a0a0f;
-            border: 2px solid #1a1a25;
-            border-radius: 25px;
+            border: 4px solid #1a1a25;
+            border-radius: 35px;
             overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
-        /* Синяя линия-маркер */
         .marker {
             position: absolute;
             left: 50%;
             top: 0;
             bottom: 0;
-            width: 3px;
+            width: 5px;
             background: var(--accent);
             z-index: 10;
             transform: translateX(-50%);
-            box-shadow: 0 0 15px var(--accent);
+            box-shadow: 0 0 20px var(--accent);
         }
 
         .strip {
@@ -91,11 +92,11 @@
         }
 
         .slot {
-            min-width: 110px;
-            height: 120px;
-            margin: 0 5px;
-            background: #0f0f15;
-            border-radius: 18px;
+            min-width: 140px; /* Увеличено */
+            height: 170px; /* Увеличено */
+            margin: 0 10px;
+            background: linear-gradient(145deg, #151520, #0a0a0f);
+            border-radius: 25px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -104,40 +105,57 @@
             box-sizing: border-box;
         }
 
-        .slot b { font-size: 32px; color: #fff; pointer-events: none; }
-        .slot span { font-size: 9px; opacity: 0.3; text-transform: uppercase; }
+        .slot b { 
+            font-size: 46px; /* Очень крупные цифры */
+            color: #fff; 
+            text-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        
+        .slot span { 
+            font-size: 11px; 
+            opacity: 0.4; 
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
 
         .btn-spin {
-            margin-top: 35px;
-            width: 260px;
-            height: 65px;
+            margin-top: 50px;
+            width: 320px;
+            height: 85px;
             background: linear-gradient(45deg, var(--accent), var(--pink));
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             color: #fff;
-            font-size: 20px;
+            font-size: 26px;
             font-weight: 900;
             text-transform: uppercase;
             cursor: pointer;
-            box-shadow: 0 8px 25px rgba(255, 0, 255, 0.3);
+            box-shadow: 0 12px 35px rgba(255, 0, 255, 0.4);
+            transition: 0.2s;
         }
 
-        .btn-spin:disabled { opacity: 0.3; }
+        .btn-spin:active { transform: scale(0.95); }
+        .btn-spin:disabled { opacity: 0.3; filter: grayscale(1); }
 
-        /* Всплывающее окно */
         #popup {
             position: fixed;
             top: 10%;
-            font-size: 55px;
+            font-size: 70px;
             font-weight: 900;
             color: var(--accent);
-            text-shadow: 0 0 20px var(--accent);
+            text-shadow: 0 0 30px var(--accent);
             display: none;
             z-index: 100;
             background: rgba(0,0,0,0.9);
-            padding: 10px 30px;
-            border-radius: 20px;
-            border: 2px solid var(--accent);
+            padding: 15px 50px;
+            border-radius: 25px;
+            border: 3px solid var(--accent);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -167,13 +185,13 @@
 
         let mode = 'easy';
         let busy = false;
-        const slotFullWidth = 120; // 110px + 10px отступы
+        const slotFullWidth = 160; // 140px card + 20px margins
 
-        // ШАНСЫ: добавлено много нулей
+        // ШАНСЫ: Немного увеличил вероятность выигрыша (меньше нулей)
         const config = {
-            easy: { cost: 50, pool: [0, 0, 0, 0, 5, 5, 10, 10, 25, 50] },
-            mid: { cost: 150, pool: [0, 0, 0, 50, 50, 100, 150, 500, 1000] },
-            hard: { cost: 1000, pool: [0, 0, 500, 1000, 5000, 10000] }
+            easy: { cost: 50, pool: [0, 5, 10, 10, 10, 25, 25, 50, 75, 100] },
+            mid: { cost: 150, pool: [0, 50, 50, 100, 100, 150, 250, 500, 1000] },
+            hard: { cost: 1000, pool: [0, 500, 1000, 2500, 5000, 10000] }
         };
 
         function setMode(m, price, el) {
@@ -190,7 +208,7 @@
             strip.style.transform = 'translateX(0)';
             strip.innerHTML = '';
             const prizes = config[mode].pool;
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 90; i++) {
                 const val = prizes[Math.floor(Math.random() * prizes.length)];
                 const slot = document.createElement('div');
                 slot.className = 'slot';
@@ -207,18 +225,15 @@
 
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
 
-            // 1. Выбираем случайный индекс (куда приедем)
-            const targetIdx = 70 + Math.floor(Math.random() * 20);
+            const targetIdx = 65 + Math.floor(Math.random() * 15);
             
-            // 2. Считаем позицию, чтобы этот индекс встал по центру (320/2 - 120/2 = 100)
-            const finalPos = -(targetIdx * slotFullWidth) + 100;
+            // Расчет центра: (ширина контейнера 380 / 2) - (ширина слота 160 / 2) = 110
+            const finalPos = -(targetIdx * slotFullWidth) + 110;
 
             strip.style.transition = 'transform 6s cubic-bezier(0.1, 0, 0.1, 1)';
             strip.style.transform = `translateX(${finalPos}px)`;
 
             setTimeout(() => {
-                // !!! ГЛАВНОЕ ИСПРАВЛЕНИЕ !!!
-                // Мы не гадаем число, а физически берем его из центральной карточки
                 const winnerElement = strip.children[targetIdx];
                 const finalValue = winnerElement.querySelector('b').innerText;
 
